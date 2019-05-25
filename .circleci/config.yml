@@ -28,17 +28,19 @@ jobs:
             dotnet nuget push -k 
 workflows:
   version: 2
-    - build_dev:
-        filters:
-          tags:
-            ignore:
-              - /destroy/
-              - /finish.*/
-    - deploy:
-        requires:
-          - build_dev
-        filters:
-          tags:
-            ignore:
-              - /destroy/
-              - /finish.*/
+  build_and_deploy:
+    jobs:
+      - build_dev:
+          filters:
+            tags:
+              ignore:
+                - /destroy/
+                - /finish.*/
+      - deploy:
+          requires:
+            - build_dev
+          filters:
+            tags:
+              ignore:
+                - /destroy/
+                - /finish.*/
