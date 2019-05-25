@@ -9,7 +9,7 @@ jobs:
       - run:
           name: build package
           command: |
-            dotnet pack -c release /p:PackageVersion="1.0.${CIRCLE_BUILD_NUM}"
+            dotnet pack -c release -o . /p:PackageVersion="1.0.${CIRCLE_BUILD_NUM}"
       - store_artifacts:
           path: artifacts
       - persist_to_workspace:
