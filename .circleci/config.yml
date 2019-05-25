@@ -36,7 +36,7 @@ workflows:
               ignore:
                 - /destroy/
                 - /finish.*/
-      - deploy:
+      - publish:
           requires:
             - build_dev
           filters:
