@@ -38,7 +38,7 @@ workflows:
                 - /finish.*/
       - publish:
           requires:
-            - build_dev
+            - build
           filters:
             tags:
               ignore:
