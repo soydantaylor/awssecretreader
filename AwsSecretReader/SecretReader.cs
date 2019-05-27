@@ -32,11 +32,7 @@ namespace AwsSecretReader
 		{
 			_envreader = new EnvironmentVariableReader();
 			_region = _envreader.GetValue("DEFAULT_AWS_REGION") ?? "us-east-1";
-//			Console.WriteLine($"region = {_region}");
 			_parameterPath = _envreader.GetValue("SSM_PARAMETER_PATH");
-//			Console.WriteLine($"parameter path = {_parameterPath}");
-//			Console.WriteLine($"accesskey = {Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID")}");
-//			Console.WriteLine($"secret = {Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY")}");
 
 			_injector = new SsmInjector();
 			
@@ -65,13 +61,11 @@ namespace AwsSecretReader
 						WithDecryption = true
 					};
 					
-					//Console.WriteLine(JsonConvert.SerializeObject(req));
 					
 					string nextToken;
 					do
 					{
 						var result = client.GetParametersByPathAsync(req).Result;
-						//Console.WriteLine(JsonConvert.SerializeObject(result));
 						parameters.AddRange(result.Parameters);
 						nextToken = result.NextToken;
 					

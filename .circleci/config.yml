@@ -28,7 +28,13 @@ jobs:
           command: |
             dotnet restore
             dotnet test ./SecretReaderTests/SecretReaderTests.csproj
-          
+  integration-tests:
+    - checkout
+    - run:
+        name: run unit tests
+        command: |
+          dotnet restore
+          dotnet test ./SsmIntegrationTest/SsmIntegrationTest.csproj
   publish:
     docker:
       - image: mcr.microsoft.com/dotnet/core/sdk:2.2
@@ -50,6 +56,16 @@ workflows:
                 - /destroy/
                 - /finish.*/
       - unit-tests:
+          requires:
+            - build
+          filters:
+            tags:
+              ignore:
+                - /destroy/
+                - /finish.*/
+      - integration-tests:
+          requires:
+            - unit-tests
           filters:
             tags:
               ignore:
@@ -59,6 +75,7 @@ workflows:
           requires:
             - build
             - unit-tests
+            - integration-tests
           filters:
             tags:
               ignore:
