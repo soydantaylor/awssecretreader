@@ -15,7 +15,7 @@ namespace SsmIntegrationTest
 		[Fact]
 		public void TestGetRealParameter()
 		{
-			var value = "this is a thing";
+			var value = "this is a test";
 			var secretReader = new SecretReader();
 			var param = secretReader.GetParameter("testingThing");
 			Assert.NotNull(param);

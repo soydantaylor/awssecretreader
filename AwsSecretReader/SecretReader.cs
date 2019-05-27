@@ -79,6 +79,12 @@ namespace AwsSecretReader
 						Console.WriteLine($"found {name}");
 						var value = p.Value;
 						Parameters.Add(name, value);
+						
+					}
+
+					foreach (var key in Parameters.Keys)
+					{
+						Console.WriteLine($"{key} = {Parameters[key]}");
 					}
 				}
 			}
