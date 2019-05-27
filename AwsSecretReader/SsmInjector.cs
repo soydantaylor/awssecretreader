@@ -1,5 +1,6 @@
 using System;
 using Amazon;
+using Amazon.Internal;
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
 
@@ -10,7 +11,7 @@ namespace AwsSecretReader
 		public virtual IAmazonSimpleSystemsManagement GetSsmClient(string region)
 		{
 
-			var rep = RegionEndpoint.USEast1;
+			RegionEndpoint rep;
 			switch (region)
 			{
 				case "us-east-2":
@@ -68,8 +69,12 @@ namespace AwsSecretReader
 				case "us-gov-west-1":
 					throw new InvalidParametersException("government regions not supported");
 				default:
-					throw new InvalidParametersException($"region {region} not supported");
+					Console.WriteLine($"{region} not supported.  Defaulting to us-east-1");
+					rep = RegionEndpoint.USEast1;
+					break;
 					
+
+
 			}
 			
 			return new AmazonSimpleSystemsManagementClient(rep);

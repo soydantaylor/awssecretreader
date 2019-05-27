@@ -32,11 +32,11 @@ namespace AwsSecretReader
 		{
 			_envreader = new EnvironmentVariableReader();
 			_region = _envreader.GetValue("DEFAULT_AWS_REGION") ?? "us-east-1";
-			Console.WriteLine($"region = {_region}");
+//			Console.WriteLine($"region = {_region}");
 			_parameterPath = _envreader.GetValue("SSM_PARAMETER_PATH");
-			Console.WriteLine($"parameter path = {_parameterPath}");
-			Console.WriteLine($"accesskey = {Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID")}");
-			Console.WriteLine($"secret = {Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY")}");
+//			Console.WriteLine($"parameter path = {_parameterPath}");
+//			Console.WriteLine($"accesskey = {Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID")}");
+//			Console.WriteLine($"secret = {Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY")}");
 
 			_injector = new SsmInjector();
 			
@@ -60,7 +60,7 @@ namespace AwsSecretReader
 				{
 					var req = new GetParametersByPathRequest
 					{
-						Path = _parameterPath,
+						Path = _parameterPath ?? "/testing",
 						Recursive = true,
 						WithDecryption = true
 					};

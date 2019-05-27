@@ -18,6 +18,17 @@ jobs:
           root: .
           paths:
             - .
+  unit-tests:
+    docker:
+      - image: mcr.microsoft.com/dotnet/core/sdk:2.2
+    steps:
+      - checkout
+      - run:
+          name: run unit tests
+          command: |
+            dotnet restore
+            dotnet test ./SecretReaderTests/SecretReaderTests.csproj
+          
   publish:
     docker:
       - image: mcr.microsoft.com/dotnet/core/sdk:2.2
@@ -38,9 +49,16 @@ workflows:
               ignore:
                 - /destroy/
                 - /finish.*/
+      - unit-tests:
+          filters:
+            tags:
+              ignore:
+                - /destroy/
+                - /finish.*/
       - publish:
           requires:
             - build
+            - unit-tests
           filters:
             tags:
               ignore:
