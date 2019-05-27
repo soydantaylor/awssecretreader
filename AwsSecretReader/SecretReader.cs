@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
-using Newtonsoft.Json;
+//using Newtonsoft.Json;
 
 namespace AwsSecretReader
 {
@@ -65,13 +65,13 @@ namespace AwsSecretReader
 						WithDecryption = true
 					};
 					
-					Console.WriteLine(JsonConvert.SerializeObject(req));
+					//Console.WriteLine(JsonConvert.SerializeObject(req));
 					
 					string nextToken;
 					do
 					{
 						var result = client.GetParametersByPathAsync(req).Result;
-						Console.WriteLine(JsonConvert.SerializeObject(result));
+						//Console.WriteLine(JsonConvert.SerializeObject(result));
 						parameters.AddRange(result.Parameters);
 						nextToken = result.NextToken;
 					
