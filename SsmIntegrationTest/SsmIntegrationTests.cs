@@ -17,6 +17,7 @@ namespace SsmIntegrationTest
 		{
 			var value = "this is a test";
 			var secretReader = new SecretReader();
+			Environment.SetEnvironmentVariable("SSM_PARAMETER_PATH", "/testing");
 			var param = secretReader.GetParameter("testingThing");
 			Assert.NotNull(param);
 			Assert.Equal(value, param);

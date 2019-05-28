@@ -58,7 +58,7 @@ namespace AwsSecretReader
 				{
 					var req = new GetParametersByPathRequest
 					{
-						Path = _parameterPath ?? "/testing",
+						Path = _parameterPath ?? "/",
 						Recursive = true,
 						WithDecryption = true
 					};
