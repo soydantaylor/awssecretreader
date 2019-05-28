@@ -76,13 +76,10 @@ namespace AwsSecretReader
 					Console.WriteLine($"found {parameters.Count} params");
 					foreach (var p in parameters)
 					{
-						
-						var name = p.Name.Replace(_parameterPath ?? "*******", string.Empty);
-						var key = Regex.Match(name, _keyPattern).Groups["key"].Value;
-						Console.WriteLine($"found {name}");
+						var key = Regex.Match(p.Name, _keyPattern).Groups["key"].Value;
+						Console.WriteLine($"found {p.Name}");
 						var value = p.Value;
 						Parameters.Add(key, value);
-						
 					}
 
 					foreach (var key in Parameters.Keys)
