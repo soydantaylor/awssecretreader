@@ -1,5 +1,7 @@
 #AwsSecretReader
 
+[![CircleCI](https://circleci.com/gh/soydantaylor/awssecretreader.svg?style=svg)](https://circleci.com/gh/soydantaylor/awssecretreader)
+
 This is designed to pull all the AWS Parameter store variables from a single path in your AWS account.
 
 It requires 3 environment variables to be set, or only 1 if you're running it on an AWS resource that has an IAM role.
