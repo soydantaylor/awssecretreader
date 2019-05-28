@@ -38,6 +38,8 @@ jobs:
           command: |
             dotnet restore
             dotnet test ./SsmIntegrationTest/SsmIntegrationTest.csproj
+          environment:
+            SSM_PARAMETER_PATH: /testing
   publish:
     docker:
       - image: mcr.microsoft.com/dotnet/core/sdk:2.2
