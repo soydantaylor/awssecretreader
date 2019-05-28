@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
-//using Newtonsoft.Json;
 
 namespace AwsSecretReader
 {
@@ -19,8 +18,6 @@ namespace AwsSecretReader
 		
 		private static Lazy<SecretReader> _lazy = new Lazy<SecretReader>(() => new SecretReader());
 
-		public static SecretReader Instance => _lazy.Value;
-		
 		/// <summary>
 		/// Pulls all of the SSM parameters for a given region and path.  This package requires running with a role
 		/// or that AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are set as environment variables.
@@ -30,7 +27,7 @@ namespace AwsSecretReader
 		/// and SSM_PARAMETER_PATH ("/" is assumed if none provided)
 		/// should be set as environment variables
 		/// </summary>
-		public SecretReader()
+		private SecretReader()
 		{
 			_envreader = new EnvironmentVariableReader();
 			_region = _envreader.GetValue("DEFAULT_AWS_REGION") ?? "us-east-1";
@@ -40,10 +37,9 @@ namespace AwsSecretReader
 			
 			Environment.SetEnvironmentVariable("DEFAULT_AWS_REGION", _region);
 			Initialize();
-			
-			
-
 		}
+
+		public static SecretReader Instance => _lazy.Value;
 
 		/// <summary>
 		/// Can be overridden by a mocking framework, but shouldn't be overridden for production purposes.

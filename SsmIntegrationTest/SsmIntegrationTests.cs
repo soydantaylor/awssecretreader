@@ -15,12 +15,11 @@ namespace SsmIntegrationTest
 		[Fact]
 		public void TestGetRealParameter()
 		{
-			var value = "this is a test";
-			var secretReader = new SecretReader();
-			Environment.SetEnvironmentVariable("SSM_PARAMETER_PATH", "/testing");
-			var param = secretReader.GetParameter("testingThing");
-			Assert.NotNull(param);
-			Assert.Equal(value, param);
+			const string expectedValue = "this is a test";
+			var secretReader = SecretReader.Instance;
+			var fetchedValue = secretReader.GetParameter("testingThing");
+			Assert.NotNull(fetchedValue);
+			Assert.Equal(expectedValue, fetchedValue);
 
 		}
 	}
