@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
 //using Newtonsoft.Json;
@@ -9,6 +10,7 @@ namespace AwsSecretReader
 	public class SecretReader
 	{
 		private readonly string _region;
+		private const string _keyPattern = @"(?<key>[^\/]+$)";
 		private readonly string _parameterPath;
 		private Dictionary<string, string> Parameters { get; set; }
 		private readonly IAmazonSimpleSystemsManagement _client;
@@ -74,11 +76,13 @@ namespace AwsSecretReader
 					Console.WriteLine($"found {parameters.Count} params");
 					foreach (var p in parameters)
 					{
-						Console.WriteLine(p.Value);
+						
+						
 						var name = p.Name.Replace(_parameterPath ?? "*******", string.Empty);
+						var key = Regex.Match(p.Value, _keyPattern).Groups["key"].Value;
 						Console.WriteLine($"found {name}");
 						var value = p.Value;
-						Parameters.Add(name, value);
+						Parameters.Add(key, value);
 						
 					}
 
