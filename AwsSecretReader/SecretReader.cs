@@ -77,9 +77,8 @@ namespace AwsSecretReader
 					foreach (var p in parameters)
 					{
 						
-						
 						var name = p.Name.Replace(_parameterPath ?? "*******", string.Empty);
-						var key = Regex.Match(p.Value, _keyPattern).Groups["key"].Value;
+						var key = Regex.Match(name, _keyPattern).Groups["key"].Value;
 						Console.WriteLine($"found {name}");
 						var value = p.Value;
 						Parameters.Add(key, value);

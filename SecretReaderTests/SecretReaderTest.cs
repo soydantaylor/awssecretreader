@@ -35,9 +35,6 @@ namespace SecretReaderTests
 			Assert.Equal(value1, thing);
 
 		}
-		
-		
-		
 
 		private async Task<GetParametersByPathResponse> GetParametersByPath(GetParametersByPathRequest request)
 		{
@@ -48,7 +45,7 @@ namespace SecretReaderTests
 				{
 					new Parameter
 					{
-						Name = "name1",
+						Name = "testing/name1",
 						Value = "value1"
 					}
 				}
