@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text.RegularExpressions;
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
 
 namespace AwsSecretReader
 {
-	public class SecretReader
+	public class SecretHandler : ISecretHandler
 	{
 		private readonly string _region;
 		private const string _keyPattern = @"(?<key>[^\/]+$)";
@@ -16,7 +17,7 @@ namespace AwsSecretReader
 		private IEnvironmentVariableReader _envreader;
 		private readonly SsmInjector _injector;
 		
-		private static Lazy<SecretReader> _lazy = new Lazy<SecretReader>(() => new SecretReader());
+		private static Lazy<SecretHandler> _lazy = new Lazy<SecretHandler>(() => new SecretHandler());
 
 		/// <summary>
 		/// Pulls all of the SSM parameters for a given region and path.  This package requires running with a role
@@ -27,7 +28,7 @@ namespace AwsSecretReader
 		/// and SSM_PARAMETER_PATH ("/" is assumed if none provided)
 		/// should be set as environment variables
 		/// </summary>
-		private SecretReader()
+		private SecretHandler()
 		{
 			_envreader = new EnvironmentVariableReader();
 			_region = _envreader.GetValue("DEFAULT_AWS_REGION") ?? "us-east-1";
@@ -39,7 +40,7 @@ namespace AwsSecretReader
 			Initialize();
 		}
 
-		public static SecretReader Instance => _lazy.Value;
+		public static SecretHandler Instance => _lazy.Value;
 
 		/// <summary>
 		/// Can be overridden by a mocking framework, but shouldn't be overridden for production purposes.
@@ -98,7 +99,7 @@ namespace AwsSecretReader
 		/// <param name="ssm"></param>
 		/// <param name="variableReader"></param>
 		/// <param name="injector"></param>
-		public SecretReader(IAmazonSimpleSystemsManagement ssm, IEnvironmentVariableReader variableReader, SsmInjector injector)
+		public SecretHandler(IAmazonSimpleSystemsManagement ssm, IEnvironmentVariableReader variableReader, SsmInjector injector)
 		{
 			Console.WriteLine("this constructor should only be used for unit testing.  It was not designed for production use.");
 			_client = ssm;
@@ -106,9 +107,6 @@ namespace AwsSecretReader
 			_injector = injector;
 			Initialize();
 		}
-
-		
-
 
 		/// <summary>
 		/// Finds a string parameter value at the path provided to the constructor.  If the parameter is not found, an error message will be returned.
@@ -120,6 +118,31 @@ namespace AwsSecretReader
 			return !Parameters.ContainsKey(parameterName) 
 				? $"{parameterName} not found in parameter dictionary check: {_parameterPath}{parameterName} is in SSM Parameter Store." 
 				: Parameters[parameterName];
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="value"></param>
+		public async void PutParameter(string name, string value, bool secure = true)
+		{
+			using (var client = _injector.GetSsmClient(_region))
+			{
+				var putRequest = new PutParameterRequest
+				{
+					Name = $"{_parameterPath}{value}"
+					, Overwrite = true
+					, Value = value
+					, Type = secure ? ParameterType.SecureString : ParameterType.String
+				};
+
+				var putResponse = await client.PutParameterAsync(putRequest);
+				if (putResponse.HttpStatusCode != HttpStatusCode.OK)
+				{
+					throw new Exception("unable to put the parameter");
+				}
+
+			}
 		}
 	}
 }

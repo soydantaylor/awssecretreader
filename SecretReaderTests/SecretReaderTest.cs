@@ -15,8 +15,8 @@ namespace SecretReaderTests
 		[Fact]
 		public void TestConstructor()
 		{
-			var name1 = "name1";
-			var value1 = "value1";
+			const string name1 = "name1";
+			const string value1 = "value1";
 			
 			
 			var ssm = new Mock<IAmazonSimpleSystemsManagement>();
@@ -30,7 +30,7 @@ namespace SecretReaderTests
 				.Returns<GetParametersByPathRequest, CancellationToken>((request,cancellationToken) => GetParametersByPath(request));
 			
 			
-			var secretReader = new SecretReader(ssm.Object, envReader.Object, getSsmThing.Object);
+			var secretReader = new SecretHandler(ssm.Object, envReader.Object, getSsmThing.Object);
 			var thing = secretReader.GetParameter(name1);
 			Assert.Equal(value1, thing);
 
