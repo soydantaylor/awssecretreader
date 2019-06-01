@@ -129,7 +129,8 @@ namespace AwsSecretReader
 		{
 			using (var client = _injector.GetSsmClient(_region))
 			{
-				var fullName = $"{_parameterPath}/{value}";
+				var fullName = $"{_parameterPath}/{name}";
+				Console.WriteLine(fullName);
 				var putRequest = new PutParameterRequest
 				{
 					Name = fullName
