@@ -12,15 +12,25 @@ namespace SsmIntegrationTest
 		{
 			_helper = helper;
 		}
-		[Fact]
-		public void TestGetRealParameter()
+		[Theory]
+		[InlineData("testingThing", "this is a test")]
+		public void TestGetRealParameter(string paramName, string paramValue)
 		{
-			const string expectedValue = "this is a test";
-			var secretReader = SecretReader.Instance;
-			var fetchedValue = secretReader.GetParameter("testingThing");
+			var secretReader = SecretHandler.Instance;
+			var fetchedValue = secretReader.GetParameter(paramName);
 			Assert.NotNull(fetchedValue);
-			Assert.Equal(expectedValue, fetchedValue);
+			Assert.Equal(paramValue, fetchedValue);
+		}
 
+		[Theory]
+		[InlineData("testingOtherThing", "another test")]
+		public async void TestPutRealParameter(string paramName, string paramValue)
+		{
+			var secretHandler = SecretHandler.Instance;
+			await secretHandler.PutParameter(paramName, paramValue);
+
+			var fetchedValue = secretHandler.GetParameter(paramName);
+			Assert.Equal(paramValue, fetchedValue);
 		}
 	}
 }
