@@ -1,4 +1,4 @@
-#AwsSecretReader
+# AwsSecretHandler
 
 [![CircleCI](https://circleci.com/gh/soydantaylor/awssecretreader.svg?style=svg)](https://circleci.com/gh/soydantaylor/awssecretreader)
 

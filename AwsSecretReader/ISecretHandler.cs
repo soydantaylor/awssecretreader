@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace AwsSecretReader
 {
 	public interface ISecretHandler
@@ -15,6 +17,6 @@ namespace AwsSecretReader
 		/// <param name="name"></param>
 		/// <param name="value"></param>
 		/// <param name="secure"></param>
-		void PutParameter(string name, string value, bool secure = true);
+		Task PutParameter(string name, string value, bool secure = true);
 	}
 }

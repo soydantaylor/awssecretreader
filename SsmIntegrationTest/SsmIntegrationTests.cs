@@ -24,10 +24,10 @@ namespace SsmIntegrationTest
 
 		[Theory]
 		[InlineData("testingOtherThing", "another test")]
-		public void TestPutRealParameter(string paramName, string paramValue)
+		public async void TestPutRealParameter(string paramName, string paramValue)
 		{
 			var secretHandler = SecretHandler.Instance;
-			secretHandler.PutParameter(paramName, paramValue);
+			await secretHandler.PutParameter(paramName, paramValue);
 
 			var fetchedValue = secretHandler.GetParameter(paramName);
 			Assert.Equal(paramValue, fetchedValue);
