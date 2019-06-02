@@ -11,7 +11,11 @@ jobs:
           name: build package
           command: |
             dotnet restore
-              dotnet pack -c release -o . /p:PackageVersion="2.0.${env:CIRCLE_BUILD_NUM}"
+            if($env:CIRCLE_BRANCH -eq "develop")
+            {
+              Write-Host "it's develop"
+            }
+            dotnet pack -c release -o . /p:PackageVersion="2.0.${env:CIRCLE_BUILD_NUM}"
       - store_artifacts:
           path: artifacts
       - persist_to_workspace:
@@ -20,11 +24,12 @@ jobs:
             - .
   unit-tests:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:2.2
+      - image: mcr.microsoft.com/dotnet/core/sdk:3.0
     steps:
       - checkout
       - run:
           name: run unit tests
+          shell: pwsh
           command: |
             dotnet restore
             dotnet test ./SecretReaderTests/SecretReaderTests.csproj
@@ -35,6 +40,7 @@ jobs:
       - checkout
       - run:
           name: run unit tests
+          shell: pwsh
           command: |
             dotnet restore
             dotnet test ./SsmIntegrationTest/SsmIntegrationTest.csproj
