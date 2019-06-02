@@ -16,7 +16,7 @@ jobs:
             {
               $version = "-alpha";
             }
-            else if ($env:CIRCLE_BRANCH.Contains("release"))
+            elseif ($env:CIRCLE_BRANCH.Contains("release"))
             {
               $version = "-beta";
             }
