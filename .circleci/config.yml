@@ -16,6 +16,16 @@ jobs:
             {
               $version = "-alpha";
             }
+            else if ($env:CIRCLE_BRANCH.Contains("release"))
+            {
+              $version = "-beta";
+            }
+            
+            if($env:CIRCLE_TAG.Contains("rc"))
+            {
+              $version = $env:CIRCLE_TAG
+            }
+            
             dotnet pack -c release -o . /p:PackageVersion="2.0.${env:CIRCLE_BUILD_NUM}${version}"
       - store_artifacts:
           path: artifacts
@@ -36,7 +46,7 @@ jobs:
             dotnet test ./SecretReaderTests/SecretReaderTests.csproj
   integration-tests:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:2.2
+      - image: mcr.microsoft.com/dotnet/core/sdk:3.0
     steps:
       - checkout
       - run:
@@ -49,7 +59,7 @@ jobs:
             SSM_PARAMETER_PATH: /testing
   publish:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:2.2
+      - image: mcr.microsoft.com/dotnet/core/sdk:3.0
     steps:
       - attach_workspace:
           at: .
