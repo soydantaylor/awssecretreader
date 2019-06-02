@@ -64,6 +64,7 @@ jobs:
       - run:
           name: push package
           command: |
+            ls -lr
             dotnet nuget push -s https://nuget.org -k $nugetapikey ./AwsSecretReader/*.nupkg
 workflows:
   version: 2
