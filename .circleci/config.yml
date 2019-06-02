@@ -97,8 +97,6 @@ workflows:
             - unit-tests
             - integration-tests
           filters:
-            branches:
-              only: master
             tags:
               ignore:
                 - /destroy/
