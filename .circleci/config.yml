@@ -11,22 +11,25 @@ jobs:
           name: build package
           command: |
             dotnet restore
-            $version = "";
+            $version = "2.0.${env:CIRCLE_BUILD_NUM}";
+            $suffix = "-prerelease";
             if($env:CIRCLE_BRANCH -eq "develop")
             {
-              $version = "-alpha";
+              $suffix = "-alpha";
             }
             elseif ($env:CIRCLE_BRANCH.Contains("release"))
             {
-              $version = "-beta";
+              $suffix = "-beta";
             }
             
-            if($env:CIRCLE_TAG -ne $null -and $env:CIRCLE_TAG.Contains("rc"))
+            if($env:CIRCLE_TAG -ne $null)
             {
-              $version = $env:CIRCLE_TAG
+              $version = $env:CIRCLE_TAG;
+              $suffix = "";
             }
             
-            dotnet pack -c release -o . /p:PackageVersion="2.0.${env:CIRCLE_BUILD_NUM}${version}"
+            $version = $version + $suffix;
+            dotnet pack -c release -o . /p:PackageVersion="${version}"
       - store_artifacts:
           path: artifacts
       - persist_to_workspace:
@@ -70,34 +73,15 @@ workflows:
   build_and_deploy:
     jobs:
       - build:
-          filters:
-            tags:
-              ignore:
-                - /destroy/
-                - /finish.*/
       - unit-tests:
           requires:
             - build
-          filters:
-            tags:
-              ignore:
-                - /destroy/
-                - /finish.*/
       - integration-tests:
           requires:
             - build
-          filters:
-            tags:
-              ignore:
-                - /destroy/
-                - /finish.*/
       - publish:
           requires:
             - build
             - unit-tests
             - integration-tests
-          filters:
-            tags:
-              ignore:
-                - /destroy/
-                - /finish.*/
+         
