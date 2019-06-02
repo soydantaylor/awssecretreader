@@ -35,23 +35,21 @@ jobs:
             - .
   unit-tests:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:3.0
+      - image: mcr.microsoft.com/dotnet/core/sdk:2.2
     steps:
       - checkout
       - run:
           name: run unit tests
-          shell: pwsh
           command: |
             dotnet restore
             dotnet test ./SecretReaderTests/SecretReaderTests.csproj
   integration-tests:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:3.0
+      - image: mcr.microsoft.com/dotnet/core/sdk:2.2
     steps:
       - checkout
       - run:
           name: run unit tests
-          shell: pwsh
           command: |
             dotnet restore
             dotnet test ./SsmIntegrationTest/SsmIntegrationTest.csproj
@@ -59,7 +57,7 @@ jobs:
             SSM_PARAMETER_PATH: /testing
   publish:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:3.0
+      - image: mcr.microsoft.com/dotnet/core/sdk:2.2
     steps:
       - attach_workspace:
           at: .
