@@ -21,7 +21,7 @@ jobs:
               $version = "-beta";
             }
             
-            if($env:CIRCLE_TAG.Contains("rc"))
+            if($env:CIRCLE_TAG -neq $null -and $env:CIRCLE_TAG.Contains("rc"))
             {
               $version = $env:CIRCLE_TAG
             }
