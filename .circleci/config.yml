@@ -11,11 +11,12 @@ jobs:
           name: build package
           command: |
             dotnet restore
+            $version = "";
             if($env:CIRCLE_BRANCH -eq "develop")
             {
-              Write-Host "it's develop"
+              $version = "-alpha";
             }
-            dotnet pack -c release -o . /p:PackageVersion="2.0.${env:CIRCLE_BUILD_NUM}"
+            dotnet pack -c release -o . /p:PackageVersion="2.0.${env:CIRCLE_BUILD_NUM}${version}"
       - store_artifacts:
           path: artifacts
       - persist_to_workspace:
