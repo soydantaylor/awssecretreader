@@ -3,10 +3,11 @@ jobs:
   build:
     working_directory: ~/repo
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:2.2
+      - image: mcr.microsoft.com/dotnet/core/sdk:3.0
     steps:
       - checkout
       - run:
+          shell: pwsh
           name: build package
           command: |
             dotnet restore
