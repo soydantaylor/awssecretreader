@@ -73,15 +73,34 @@ workflows:
   build_and_deploy:
     jobs:
       - build:
+          filters:
+            tags:
+              ignore:
+                - /destroy/
+                - /finish.*/
       - unit-tests:
           requires:
             - build
+          filters:
+            tags:
+              ignore:
+                - /destroy/
+                - /finish.*/
       - integration-tests:
           requires:
             - build
+          filters:
+            tags:
+              ignore:
+                - /destroy/
+                - /finish.*/
       - publish:
           requires:
             - build
             - unit-tests
             - integration-tests
-         
+          filters:
+            tags:
+              ignore:
+                - /destroy/
+                - /finish.*/
