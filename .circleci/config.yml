@@ -71,37 +71,16 @@ jobs:
 workflows:
   version: 2
   build_and_deploy:
-    #TODO: Get rid of the filters in the workflows because they're not being used
     jobs:
-      - build:
-          filters:
-            tags:
-              ignore:
-                - /destroy/
-                - /finish.*/
+      - build
       - unit-tests:
           requires:
             - build
-          filters:
-            tags:
-              ignore:
-                - /destroy/
-                - /finish.*/
       - integration-tests:
           requires:
             - build
-          filters:
-            tags:
-              ignore:
-                - /destroy/
-                - /finish.*/
       - publish:
           requires:
             - build
             - unit-tests
             - integration-tests
-          filters:
-            tags:
-              ignore:
-                - /destroy/
-                - /finish.*/
