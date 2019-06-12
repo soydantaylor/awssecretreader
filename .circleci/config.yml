@@ -3,14 +3,33 @@ jobs:
   build:
     working_directory: ~/repo
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:2.2
+      - image: mcr.microsoft.com/dotnet/core/sdk:3.0
     steps:
       - checkout
       - run:
+          shell: pwsh
           name: build package
           command: |
             dotnet restore
-              dotnet pack -c release -o . /p:PackageVersion="2.0.${CIRCLE_BUILD_NUM}"
+            $version = "2.0.${env:CIRCLE_BUILD_NUM}";
+            $suffix = "-prerelease";
+            if($env:CIRCLE_BRANCH -eq "develop")
+            {
+              $suffix = "-alpha";
+            }
+            elseif ($env:CIRCLE_BRANCH.Contains("release"))
+            {
+              $suffix = "-beta";
+            }
+            
+            if($env:CIRCLE_TAG -ne $null)
+            {
+              $version = $env:CIRCLE_TAG;
+              $suffix = "";
+            }
+            
+            $version = $version + $suffix;
+            dotnet pack -c release -o . /p:PackageVersion="${version}"
       - store_artifacts:
           path: artifacts
       - persist_to_workspace:
@@ -48,42 +67,20 @@ jobs:
       - run:
           name: push package
           command: |
-            dotnet nuget push -s https://nuget.org -k $nugetapikey ./AwsSecretReader/*.nupkg
+            dotnet nuget push -s https://nuget.org -k $nugetapikey *.nupkg
 workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - build:
-          filters:
-            tags:
-              ignore:
-                - /destroy/
-                - /finish.*/
+      - build
       - unit-tests:
           requires:
             - build
-          filters:
-            tags:
-              ignore:
-                - /destroy/
-                - /finish.*/
       - integration-tests:
           requires:
             - build
-          filters:
-            tags:
-              ignore:
-                - /destroy/
-                - /finish.*/
       - publish:
           requires:
             - build
             - unit-tests
             - integration-tests
-          filters:
-            branches:
-              only: master
-            tags:
-              ignore:
-                - /destroy/
-                - /finish.*/

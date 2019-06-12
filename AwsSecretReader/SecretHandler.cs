@@ -18,8 +18,6 @@ namespace AwsSecretReader
 		private IEnvironmentVariableReader _envreader;
 		private readonly SsmInjector _injector;
 		
-		private static Lazy<SecretHandler> _lazy = new Lazy<SecretHandler>(() => new SecretHandler());
-
 		/// <summary>
 		/// Pulls all of the SSM parameters for a given region and path.  This package requires running with a role
 		/// or that AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are set as environment variables.
@@ -29,7 +27,7 @@ namespace AwsSecretReader
 		/// and SSM_PARAMETER_PATH ("/" is assumed if none provided)
 		/// should be set as environment variables
 		/// </summary>
-		private SecretHandler()
+		public SecretHandler()
 		{
 			_envreader = new EnvironmentVariableReader();
 			
@@ -38,8 +36,6 @@ namespace AwsSecretReader
 			_injector = new SsmInjector();
 			Initialize();
 		}
-
-		public static SecretHandler Instance => _lazy.Value;
 
 		/// <summary>
 		/// Can be overridden by a mocking framework, but shouldn't be overridden for production purposes.
