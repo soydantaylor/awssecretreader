@@ -25,12 +25,12 @@ AwsSecretReader will recursively pull all the variables at that path, so you onl
 Then it's as easy as 
 
 ```
-var secretReader = SecretReader.Instance;
+var secretReader = new SecretReader();
 var fetchedValue = secretReader.GetParameter("api-key");
 ```
 or
 ```
-var secretReader = SecretReader.Instance;
+var secretReader = new SecretReader();
 var fetchedValue = secretReader.GetParameter("postgresdb");
 ```
 

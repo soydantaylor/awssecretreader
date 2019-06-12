@@ -16,7 +16,7 @@ namespace SsmIntegrationTest
 		[InlineData("testingThing", "this is a test")]
 		public void TestGetRealParameter(string paramName, string paramValue)
 		{
-			var secretReader = SecretHandler.Instance;
+			var secretReader = new SecretHandler();
 			var fetchedValue = secretReader.GetParameter(paramName);
 			Assert.NotNull(fetchedValue);
 			Assert.Equal(paramValue, fetchedValue);
@@ -26,7 +26,7 @@ namespace SsmIntegrationTest
 		[InlineData("testingOtherThing", "another test")]
 		public async void TestPutRealParameter(string paramName, string paramValue)
 		{
-			var secretHandler = SecretHandler.Instance;
+			var secretHandler = new SecretHandler();
 			await secretHandler.PutParameter(paramName, paramValue);
 
 			var fetchedValue = secretHandler.GetParameter(paramName);
