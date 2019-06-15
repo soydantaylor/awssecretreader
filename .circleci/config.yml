@@ -62,7 +62,7 @@ jobs:
       - run:
           name: push package
           command: |
-            $version = "2.0.${CIRCLE_BUILD_NUM}{SUFFIX}"
+            version="2.0.${CIRCLE_BUILD_NUM}${SUFFIX}"
             dotnet pack -c release -o . /p:PackageVersion="${version}"
             dotnet nuget push -s https://nuget.org -k $nugetapikey *.nupkg
           environment:
