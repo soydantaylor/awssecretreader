@@ -98,6 +98,10 @@ workflows:
           requires:
             - unit-tests
             - integration-tests
+          filters:
+            branches:
+              ignore:
+                - /master/
       - publish-prod:
           requires:
             - unit-tests
