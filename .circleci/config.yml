@@ -62,9 +62,10 @@ jobs:
       - run:
           name: push package
           command: |
-            version="2.0.${CIRCLE_BUILD_NUM}${SUFFIX}"
+            version="2.0.1${SUFFIX}"
             dotnet pack -c release -o . /p:PackageVersion="${version}"
-            dotnet nuget push -s https://nuget.org -k $nugetapikey *.nupkg
+            ls -a
+            dotnet nuget push -s https://nuget.org -k $nugetapikey ./AwsSecretReader/*.nupkg
           environment:
             SUFFIX: -alpha
 workflows:
@@ -82,15 +83,14 @@ workflows:
           requires:
             - unit-tests
             - integration-tests
-          filters:
-            tags:
-              ignore:
-                - /^\d*\.\d*\.\d*$/ #Semver version to be published as a production package
       - publish-prod:
           requires:
             - unit-tests
             - integration-tests
           filters:
+            branches:
+              only:
+                - master
             tags:
               only:
                 - /^\d*\.\d*\.\d*$/ #Semver version to be published as a production package
