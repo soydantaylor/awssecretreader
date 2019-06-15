@@ -1,35 +1,21 @@
 version: 2
 jobs:
-  build:
+  restore:
     working_directory: ~/repo
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:3.0
+      - image: mcr.microsoft.com/dotnet/core/sdk:2.2
     steps:
       - checkout
       - run:
-          shell: pwsh
           name: build package
           command: |
             dotnet restore
-            $version = "2.0.${env:CIRCLE_BUILD_NUM}";
-            $suffix = "-prerelease";
-            if($env:CIRCLE_BRANCH -eq "develop")
-            {
-              $suffix = "-alpha";
-            }
-            elseif ($env:CIRCLE_BRANCH.Contains("release"))
-            {
-              $suffix = "-beta";
-            }
-            
-            if($env:CIRCLE_TAG -ne $null)
-            {
-              $version = $env:CIRCLE_TAG;
-              $suffix = "";
-            }
-            
-            $version = $version + $suffix;
-            dotnet pack -c release -o . /p:PackageVersion="${version}"
+      - save-cache:
+          paths:
+            - /tmp/NugetScratch
+            - /root/.nuget/
+            - /root/.local/share/NuGet
+          key: nuget-cache-{{ .Branch }}
       - store_artifacts:
           path: artifacts
       - persist_to_workspace:
@@ -40,16 +26,21 @@ jobs:
     docker:
       - image: mcr.microsoft.com/dotnet/core/sdk:2.2
     steps:
+      - restore-cache:
+          keys:
+            - nuget-cache-{{ .Branch }}
       - checkout
       - run:
           name: run unit tests
           command: |
-            dotnet restore
             dotnet test ./SecretReaderTests/SecretReaderTests.csproj
   integration-tests:
     docker:
       - image: mcr.microsoft.com/dotnet/core/sdk:2.2
     steps:
+      - restore-cache:
+          keys:
+            - nuget-cache-{{ .Branch }}
       - checkout
       - run:
           name: run unit tests
@@ -58,29 +49,63 @@ jobs:
             dotnet test ./SsmIntegrationTest/SsmIntegrationTest.csproj
           environment:
             SSM_PARAMETER_PATH: /testing
-  publish:
+  publish-prerelease:
     docker:
       - image: mcr.microsoft.com/dotnet/core/sdk:2.2
     steps:
       - attach_workspace:
           at: .
+      - restore-cache:
+          keys:
+            - nuget-cache-{{ .Branch }}
+      - checkout
       - run:
           name: push package
           command: |
-            dotnet nuget push -s https://nuget.org -k $nugetapikey *.nupkg
+            version="2.0.${CIRCLE_BUILD_NUM}${SUFFIX}"
+            dotnet pack -c release -o . /p:PackageVersion="${version}"
+            dotnet nuget push -s https://nuget.org -k $nugetapikey ./AwsSecretReader/*.nupkg
+          environment:
+            SUFFIX: -alpha
+  publish-prod:
+    docker:
+      - image: mcr.microsoft.com/dotnet/core/sdk:2.2
+    steps:
+      - attach_workspace:
+          at: .
+      - restore-cache:
+          keys:
+            - nuget-cache-{{ .Branch }}
+      - checkout
+      - run:
+          name: push package
+          command: |
+            version="${CIRCLE_TAG}"
+            dotnet pack -c release -o . /p:PackageVersion="${version}"
+            dotnet nuget push -s https://nuget.org -k $nugetapikey ./AwsSecretReader/*.nupkg
 workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - build
+      - restore
       - unit-tests:
           requires:
-            - build
+            - restore
       - integration-tests:
           requires:
-            - build
-      - publish:
+            - restore
+      - publish-prerelease:
           requires:
-            - build
             - unit-tests
             - integration-tests
+      - publish-prod:
+          requires:
+            - unit-tests
+            - integration-tests
+          filters:
+            branches:
+              ignore:
+                - /.*/
+            tags:
+              only:
+                - /^\d*\.\d*\.\d*$/ #Semver version to be published as a production package
