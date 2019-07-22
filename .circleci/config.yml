@@ -108,8 +108,8 @@ workflows:
             - integration-tests
           filters:
             branches:
-              ignore:
-                - /.*/
+              only:
+                - /master/
             tags:
               only:
                 - /^\d*\.\d*\.\d*$/ #Semver version to be published as a production package
