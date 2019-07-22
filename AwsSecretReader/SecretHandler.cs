@@ -14,7 +14,6 @@ namespace AwsSecretReader
 		private const string _keyPattern = @"(?<key>[^\/]+$)";
 		private readonly string _parameterPath;
 		private Dictionary<string, string> Parameters { get; set; }
-		private readonly IAmazonSimpleSystemsManagement _client;
 		private IEnvironmentVariableReader _envreader;
 		private readonly SsmInjector _injector;
 		
@@ -55,35 +54,25 @@ namespace AwsSecretReader
 						WithDecryption = true
 					};
 					
-					
-					string nextToken;
 					do
 					{
 						var result = client.GetParametersByPathAsync(req).Result;
+						req.NextToken = result.NextToken;
 						parameters.AddRange(result.Parameters);
-						nextToken = result.NextToken;
 					
-					} while (!string.IsNullOrEmpty(nextToken));
+					} while (!string.IsNullOrEmpty(req.NextToken));
 
-					Console.WriteLine($"found {parameters.Count} params");
 					foreach (var p in parameters)
 					{
 						var key = Regex.Match(p.Name, _keyPattern).Groups["key"].Value;
-						Console.WriteLine($"found {p.Name}");
 						var value = p.Value;
 						Parameters.Add(key, value);
-					}
-
-					foreach (var key in Parameters.Keys)
-					{
-						Console.WriteLine($"{key} = {Parameters[key]}");
 					}
 				}
 			}
 			catch (Exception e)
 			{
 				Console.WriteLine($"could not get params {e}");//just log it on the console for now.
-				
 				throw;
 			}
 		}
@@ -97,7 +86,6 @@ namespace AwsSecretReader
 		public SecretHandler(IAmazonSimpleSystemsManagement ssm, IEnvironmentVariableReader variableReader, SsmInjector injector)
 		{
 			Console.WriteLine("this constructor should only be used for unit testing.  It was not designed for production use.");
-			_client = ssm;
 			_envreader = variableReader;
 			_injector = injector;
 			Initialize();
@@ -111,7 +99,7 @@ namespace AwsSecretReader
 		public string GetParameter(string parameterName)
 		{
 			return !Parameters.ContainsKey(parameterName) 
-				? $"{parameterName} not found in parameter dictionary check: {_parameterPath}{parameterName} is in SSM Parameter Store." 
+				? $"{parameterName} not found in parameter dictionary check: {_parameterPath}/{parameterName} is in SSM Parameter Store." 
 				: Parameters[parameterName];
 		}
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleSystemsManagement;
@@ -12,13 +13,21 @@ namespace SecretReaderTests
 {
 	public class SecretReaderTest
 	{
+		public int NumTimesGetParamsByPathCalled { get; set; }
+		public SecretReaderTest()
+		{
+			NumTimesGetParamsByPathCalled = 0;
+		}
+		
 		[Fact]
 		public void TestConstructor()
 		{
 			const string name1 = "name1";
 			const string value1 = "value1";
-			
-			
+			const string name2 = "name2";
+			const string value2 = "value2";
+
+
 			var ssm = new Mock<IAmazonSimpleSystemsManagement>();
 			var envReader = new Mock<IEnvironmentVariableReader>();
 			var getSsmThing = new Mock<SsmInjector>();
@@ -32,7 +41,9 @@ namespace SecretReaderTests
 			
 			var secretReader = new SecretHandler(ssm.Object, envReader.Object, getSsmThing.Object);
 			var thing = secretReader.GetParameter(name1);
+			var thing2 = secretReader.GetParameter(name2);
 			Assert.Equal(value1, thing);
+			Assert.Equal(value2, thing2);
 
 		}
 		
@@ -40,9 +51,10 @@ namespace SecretReaderTests
 
 		private async Task<GetParametersByPathResponse> GetParametersByPath(GetParametersByPathRequest request)
 		{
-			var getParametersByPathResponse = new GetParametersByPathResponse
+			++NumTimesGetParamsByPathCalled;
+			var primaryResponse = new GetParametersByPathResponse
 			{
-				NextToken = null,
+				NextToken = "some-token",
 				Parameters = new List<Parameter>
 				{
 					new Parameter
@@ -52,7 +64,29 @@ namespace SecretReaderTests
 					}
 				}
 			};
-			return await Task.FromResult(getParametersByPathResponse);
+			
+			var secondaryResponse = new GetParametersByPathResponse
+            {
+            	NextToken = null,
+            	Parameters = new List<Parameter>
+            	{
+            		new Parameter
+            		{
+            			Name = "/app/someapp/dev/thing/testing/name2",
+            			Value = "value2"
+            		}
+            	}
+            };
+
+			var response = primaryResponse;
+			
+			if (NumTimesGetParamsByPathCalled > 1)
+			{
+				response = secondaryResponse;
+			}
+			
+			
+			return await Task.FromResult(response);
 		}
 	}
 }
