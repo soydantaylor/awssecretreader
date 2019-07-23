@@ -108,5 +108,6 @@ workflows:
             - integration-tests
           filters:
             tags:
-              only:
-                - /^\d*\.\d*\.\d*$/ #Semver version to be published as a production package
+              only: /^\d*\.\d*\.\d*$/ #Semver version to be published as a production package
+            branches:
+              ignore: /.*/            
