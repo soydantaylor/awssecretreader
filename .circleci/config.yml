@@ -87,7 +87,10 @@ workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - restore
+      - restore:
+          filters:
+            tags:
+              only: /^\d*\.\d*\.\d*/
       - unit-tests:
           requires:
             - restore
