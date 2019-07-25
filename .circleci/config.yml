@@ -87,18 +87,38 @@ workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - restore
+      - restore:
+          filters:
+            tags:
+              only: /^\d*\.\d*\.\d*/
+            branches:
+              ignore:
+                - /master/
       - unit-tests:
           requires:
             - restore
+          filters:
+            tags:
+              only: /^\d*\.\d*\.\d*/
+            branches:
+              ignore:
+                - /master/
       - integration-tests:
           requires:
             - restore
+          filters:
+            tags:
+              only: /^\d*\.\d*\.\d*/
+            branches:
+              ignore:
+                - /master/
       - publish-prerelease:
           requires:
             - unit-tests
             - integration-tests
           filters:
+            tags:
+              ignore: /.*/
             branches:
               ignore:
                 - /master/
@@ -107,9 +127,7 @@ workflows:
             - unit-tests
             - integration-tests
           filters:
-            branches:
-              ignore:
-                - /.*/
             tags:
-              only:
-                - /^\d*\.\d*\.\d*$/ #Semver version to be published as a production package
+              only: /^\d*\.\d*\.\d*/ #Semver version to be published as a production package
+            branches:
+              ignore: /.*/            
