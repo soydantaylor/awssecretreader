@@ -91,18 +91,27 @@ workflows:
           filters:
             tags:
               only: /^\d*\.\d*\.\d*/
+            branches:
+              ignore:
+                - /master/
       - unit-tests:
           requires:
             - restore
           filters:
             tags:
               only: /^\d*\.\d*\.\d*/
+            branches:
+              ignore:
+                - /master/
       - integration-tests:
           requires:
             - restore
           filters:
             tags:
               only: /^\d*\.\d*\.\d*/
+            branches:
+              ignore:
+                - /master/
       - publish-prerelease:
           requires:
             - unit-tests
