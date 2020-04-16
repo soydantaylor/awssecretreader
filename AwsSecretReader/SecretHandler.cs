@@ -16,7 +16,9 @@ namespace AwsSecretReader
 		private Dictionary<string, string> Parameters { get; set; }
 		private IEnvironmentVariableReader _envreader;
 		private readonly SsmInjector _injector;
-		
+
+		private const string SSM_PARAM_NOT_FOUND = "";
+
 		/// <summary>
 		/// Pulls all of the SSM parameters for a given region and path.  This package requires running with a role
 		/// or that AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are set as environment variables.
@@ -29,7 +31,7 @@ namespace AwsSecretReader
 		public SecretHandler()
 		{
 			_envreader = new EnvironmentVariableReader();
-			
+
 			_region = _envreader.GetValue("DEFAULT_AWS_REGION") ?? "us-east-1";
 			_parameterPath = _envreader.GetValue("SSM_PARAMETER_PATH");
 			_injector = new SsmInjector();
@@ -53,13 +55,12 @@ namespace AwsSecretReader
 						Recursive = true,
 						WithDecryption = true
 					};
-					
+
 					do
 					{
 						var result = client.GetParametersByPathAsync(req).Result;
 						req.NextToken = result.NextToken;
 						parameters.AddRange(result.Parameters);
-					
 					} while (!string.IsNullOrEmpty(req.NextToken));
 
 					foreach (var p in parameters)
@@ -72,7 +73,7 @@ namespace AwsSecretReader
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine($"could not get params {e}");//just log it on the console for now.
+				Console.WriteLine($"could not get params {e}"); //just log it on the console for now.
 				throw;
 			}
 		}
@@ -83,9 +84,11 @@ namespace AwsSecretReader
 		/// <param name="ssm"></param>
 		/// <param name="variableReader"></param>
 		/// <param name="injector"></param>
-		public SecretHandler(IAmazonSimpleSystemsManagement ssm, IEnvironmentVariableReader variableReader, SsmInjector injector)
+		public SecretHandler(IAmazonSimpleSystemsManagement ssm, IEnvironmentVariableReader variableReader,
+			SsmInjector injector)
 		{
-			Console.WriteLine("this constructor should only be used for unit testing.  It was not designed for production use.");
+			Console.WriteLine(
+				"this constructor should only be used for unit testing.  It was not designed for production use.");
 			_envreader = variableReader;
 			_injector = injector;
 			Initialize();
@@ -98,9 +101,27 @@ namespace AwsSecretReader
 		/// <returns>The value of the key/value pair requested by its key</returns>
 		public string GetParameter(string parameterName)
 		{
-			return !Parameters.ContainsKey(parameterName) 
-				? $"{parameterName} not found in parameter dictionary check: {_parameterPath}/{parameterName} is in SSM Parameter Store." 
-				: Parameters[parameterName];
+			var envVariable = Environment.GetEnvironmentVariable(parameterName);
+
+			//if it's in the env variable, log it and use it
+			if (!string.IsNullOrWhiteSpace(envVariable))
+			{
+				Console.WriteLine($"found {parameterName} in environment variable.  Overriding SSM value");
+				return envVariable;
+			}
+
+			//if it's not, check SSM, and use it if it's there.
+			if (Parameters.ContainsKey(parameterName))
+			{
+				return Parameters[parameterName];
+			}
+
+			throw new Exception(SSM_PARAM_NOT_FOUND);
+
+
+			// return !Parameters.ContainsKey(parameterName) 
+			// 	? $"{parameterName} not found in parameter dictionary check: {_parameterPath}/{parameterName} is in SSM Parameter Store." 
+			// 	: Parameters[parameterName];
 		}
 
 		/// <inheritdoc />
@@ -117,10 +138,8 @@ namespace AwsSecretReader
 				Console.WriteLine(fullName);
 				var putRequest = new PutParameterRequest
 				{
-					Name = fullName
-					, Overwrite = true
-					, Value = value
-					, Type = secure ? ParameterType.SecureString : ParameterType.String
+					Name = fullName, Overwrite = true, Value = value,
+					Type = secure ? ParameterType.SecureString : ParameterType.String
 				};
 
 				var putResponse = await client.PutParameterAsync(putRequest);
@@ -128,7 +147,6 @@ namespace AwsSecretReader
 				{
 					throw new Exception("unable to put the parameter");
 				}
-
 			}
 		}
 	}
